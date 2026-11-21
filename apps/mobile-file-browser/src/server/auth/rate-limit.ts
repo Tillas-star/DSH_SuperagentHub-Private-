@@ -38,6 +38,13 @@ export class LoginLimiter {
     if (state?.lockedUntil && state.lockedUntil > now) {
       return { ok: false, retryAfterSeconds: Math.ceil((state.lockedUntil - now) / 1000) };
     }
+    if (state?.lockedUntil && state.lockedUntil <= now) {
+      // A completed lockout starts a fresh attempt window.
+      state.lockedUntil = 0;
+      state.consecutive = 0;
+      state.nextAllowedAt = 0;
+      state.failures = [];
+    }
     if (state?.nextAllowedAt && state.nextAllowedAt > now) {
       return { ok: false, retryAfterSeconds: Math.ceil((state.nextAllowedAt - now) / 1000) };
     }

@@ -6,7 +6,7 @@
 - **同一局域网**：`--lan` 监听网卡，手机扫码配对；
 - **外网**：只监听回环，通过 Tailscale Serve / Cloudflare Tunnel 等隧道访问，使用访问密码登录。
 
-实现对应 `docs/proposals/mobile-file-browser.md` v0.2 的 M1–M4，并包含 M5 中不依赖额外账号的部分（README、跨平台 CI、缓存清理、终端二维码等）。没有上传、删除、重命名、移动、新建、编辑或下载按钮。
+实现对应 `docs/proposals/mobile-file-browser.md` v0.2 的 M1–M4，并补齐 README、跨平台 CI、缓存清理、终端二维码等交付细节。没有上传、删除、重命名、移动、新建、编辑或下载按钮。
 
 > 仓库位置：`apps/mobile-file-browser/`，不修改 DSH 本体。
 
@@ -84,17 +84,23 @@ tailscale serve status
 Cloudflare Tunnel（需要 Cloudflare 账号；命名隧道通常还需要自己的域名）：
 
 ```bash
+# 先用 cloudflared tunnel create / route dns 配好命名隧道
 npm start -- --root "$HOME/Pictures" --public-url https://files.example.com
-cloudflared tunnel --url http://127.0.0.1:8787
+cloudflared tunnel run mobile-files
 ```
 
-在 Cloudflare Zero Trust 中把隧道指向 `http://127.0.0.1:8787`，建议加 Access 策略。`--public-url` 必须与浏览器地址的 scheme + host 完全一致（只接受 `https://`，不能带路径、查询参数或锚点）。
+在 Cloudflare Zero Trust 中把命名隧道指向 `http://127.0.0.1:8787`，建议加 Access 策略。`--public-url` 必须与浏览器地址的 scheme + host 完全一致（只接受 `https://`，不能带路径、查询参数或锚点）。
+
+临时试用可以用 Quick Tunnel：`cloudflared tunnel --url http://127.0.0.1:8787`。它的 URL 每次变化、生命周期短，只适合临时验证；必须设置强密码，并按实际地址调整启动参数。
+
+Tailscale Funnel：`tailscale funnel --bg 8787` 会让地址对整个互联网可达，必须使用强密码；公网端口限制以 Tailscale 当前文档为准。不推荐作为长期默认入口。
 
 ### 3. 撤销
 
 ```bash
 tailscale serve --https=443 off    # 或关闭 cloudflared
-npm start -- --reset-sessions      # 让所有设备立即失效（下次启动时执行）
+# 在正常启动命令后加上 --reset-sessions，让所有设备立即失效
+npm start -- --root "$HOME/Pictures" --reset-sessions
 ```
 
 > 不要使用路由器端口映射 + DDNS 直接暴露服务；不要运行无密码的公网隧道。应用仍要求自己的密码，隧道身份层只是额外一层。

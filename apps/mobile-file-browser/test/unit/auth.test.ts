@@ -134,7 +134,12 @@ describe('rate limiting', () => {
     expect(locked.ok).toBe(false);
     clock.advance(15 * 60_000 + 1);
     expect(limiter.check('1.2.3.4').ok).toBe(true);
+    limiter.fail('1.2.3.4');
+    const afterLock = limiter.check('1.2.3.4');
+    expect(afterLock.ok).toBe(false);
+    expect(afterLock.retryAfterSeconds).toBeLessThanOrEqual(2);
 
+    clock.advance(2_100);
     limiter.success('1.2.3.4');
     expect(limiter.check('1.2.3.4').ok).toBe(true);
   });
