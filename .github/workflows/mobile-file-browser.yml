@@ -1,0 +1,61 @@
+name: mobile-file-browser
+
+on:
+  push:
+    paths:
+      - "apps/mobile-file-browser/**"
+      - ".github/workflows/mobile-file-browser.yml"
+  pull_request:
+    paths:
+      - "apps/mobile-file-browser/**"
+      - ".github/workflows/mobile-file-browser.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    defaults:
+      run:
+        working-directory: apps/mobile-file-browser
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/mobile-file-browser/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  e2e:
+    name: e2e (chromium)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile-file-browser
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/mobile-file-browser/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/mobile-file-browser/playwright-report
+          retention-days: 7
