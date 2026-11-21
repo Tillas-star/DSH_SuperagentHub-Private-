@@ -11,12 +11,23 @@ export class PairingToken {
   private readonly hash: Buffer;
   private readonly expiresAt: number;
   private used = false;
-  readonly token: string;
+  private tokenValue: string | null;
 
   constructor(ttlMs = TOKEN_TTL_MS, now = Date.now()) {
-    this.token = randomBytes(TOKEN_BYTES).toString('base64url');
-    this.hash = hashToken(this.token);
+    this.tokenValue = randomBytes(TOKEN_BYTES).toString('base64url');
+    this.hash = hashToken(this.tokenValue);
     this.expiresAt = now + ttlMs;
+  }
+
+  /** The raw token is kept only until it has been printed/handed out. */
+  get token(): string {
+    if (this.tokenValue === null) throw new Error('pairing token is no longer available');
+    return this.tokenValue;
+  }
+
+  /** Drop the raw token; the hash and expiry remain for pairing validation. */
+  clearToken(): void {
+    this.tokenValue = null;
   }
 
   available(now = Date.now()): boolean {
@@ -35,6 +46,7 @@ export class PairingToken {
     if (candidateHash.length !== this.hash.length) return false;
     if (!timingSafeEqual(candidateHash, this.hash)) return false;
     this.used = true;
+    this.tokenValue = null;
     return true;
   }
 }

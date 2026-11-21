@@ -129,6 +129,7 @@ async function main(): Promise<void> {
     const port =
       address && typeof address === 'object' && 'port' in address ? address.port : config.port;
     printStartup(config, port, pairing, passwordStore.hasPassword());
+    pairing.clearToken();
 
     const shutdown = async (signal: string): Promise<void> => {
       console.log(`\n收到 ${signal}，正在退出…`);

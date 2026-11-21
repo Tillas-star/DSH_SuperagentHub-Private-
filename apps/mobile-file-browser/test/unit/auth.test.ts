@@ -50,19 +50,22 @@ describe('PairingToken', () => {
   it('is one-time and expires', () => {
     const clock = fakeClock(1_000_000);
     const pairing = new PairingToken(10_000, clock.now());
+    const token = pairing.token;
     expect(pairing.available(clock.now())).toBe(true);
     expect(pairing.consume('wrong', clock.now())).toBe(false);
-    expect(pairing.consume(pairing.token, clock.now())).toBe(true);
+    expect(pairing.consume(token, clock.now())).toBe(true);
     expect(pairing.available(clock.now())).toBe(false);
-    expect(pairing.consume(pairing.token, clock.now())).toBe(false);
+    expect(pairing.consume(token, clock.now())).toBe(false);
+    expect(() => pairing.token).toThrow();
   });
 
   it('rejects a token after its ttl', () => {
     const clock = fakeClock(1_000_000);
     const pairing = new PairingToken(10_000, clock.now());
+    const token = pairing.token;
     clock.advance(10_001);
     expect(pairing.available(clock.now())).toBe(false);
-    expect(pairing.consume(pairing.token, clock.now())).toBe(false);
+    expect(pairing.consume(token, clock.now())).toBe(false);
   });
 });
 

@@ -23,6 +23,7 @@ describe('API with a paired session', () => {
   let ctx: TestContext;
   let cookie: string;
   let pairResponse: Awaited<ReturnType<TestContext['app']['inject']>>;
+  let pairingToken = '';
   let symlinkCreated = false;
 
   beforeAll(async () => {
@@ -49,10 +50,11 @@ describe('API with a paired session', () => {
       // Ignore platforms without symlink permission.
     }
 
+    pairingToken = ctx.pairing.token;
     pairResponse = await ctx.app.inject({
       method: 'POST',
       url: '/api/session/pair',
-      payload: { token: ctx.pairing.token },
+      payload: { token: pairingToken },
     });
     cookie = firstCookie(pairResponse.headers['set-cookie']);
   });
@@ -98,7 +100,7 @@ describe('API with a paired session', () => {
     const reused = await ctx.app.inject({
       method: 'POST',
       url: '/api/session/pair',
-      payload: { token: ctx.pairing.token },
+      payload: { token: pairingToken },
     });
     expect(reused.statusCode).toBe(401);
 
