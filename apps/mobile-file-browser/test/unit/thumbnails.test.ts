@@ -6,6 +6,7 @@ import type { RootConfig } from '../../src/server/config';
 import { PathGuard } from '../../src/server/paths';
 import { ThumbnailService } from '../../src/server/thumbnails';
 import { writeJpeg, writeText } from '../support/context';
+import { removeTempDir } from '../support/cleanup';
 
 describe('ThumbnailService', () => {
   let baseDir: string;
@@ -41,7 +42,7 @@ describe('ThumbnailService', () => {
   });
 
   afterAll(async () => {
-    await fs.rm(baseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    await removeTempDir(baseDir);
   });
 
   it('generates a bounded WebP thumbnail and reuses its cache', async () => {

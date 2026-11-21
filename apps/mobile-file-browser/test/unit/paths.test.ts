@@ -5,6 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { RootConfig } from '../../src/server/config';
 import { AppError } from '../../src/server/errors';
 import { isPathInside, parseRelativePath, PathGuard } from '../../src/server/paths';
+import { removeTempDir } from '../support/cleanup';
 
 describe('parseRelativePath', () => {
   it('accepts ordinary relative paths and empty roots', () => {
@@ -72,7 +73,7 @@ describe('PathGuard', () => {
   });
 
   afterAll(async () => {
-    await fs.rm(baseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    await removeTempDir(baseDir);
   });
 
   it('resolves nested paths inside the root', async () => {

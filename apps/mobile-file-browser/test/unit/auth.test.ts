@@ -7,6 +7,7 @@ import { PairingToken } from '../../src/server/auth/pairing';
 import { LoginLimiter, PairingLimiter } from '../../src/server/auth/rate-limit';
 import { SessionStore } from '../../src/server/auth/session';
 import { fakeClock } from '../support/context';
+import { removeTempDir } from '../support/cleanup';
 
 describe('PasswordStore', () => {
   let dir: string;
@@ -14,7 +15,7 @@ describe('PasswordStore', () => {
     dir = await fs.mkdtemp(path.join(os.tmpdir(), 'mfb-password-'));
   });
   afterAll(async () => {
-    await fs.rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    await removeTempDir(dir);
   });
 
   it('hashes, verifies and never stores the plaintext', async () => {
@@ -86,7 +87,7 @@ describe('SessionStore', () => {
       clock.advance(60_001);
       expect(reloaded.validate(created.token)).toBeNull();
     } finally {
-      await fs.rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+      await removeTempDir(dir);
     }
   });
 
@@ -105,7 +106,7 @@ describe('SessionStore', () => {
       expect(store.validate(second.token)).toBeNull();
       expect(store.size()).toBe(0);
     } finally {
-      await fs.rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+      await removeTempDir(dir);
     }
   });
 });

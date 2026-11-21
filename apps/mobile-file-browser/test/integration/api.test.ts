@@ -17,6 +17,7 @@ import {
   writeText,
   type TestContext,
 } from '../support/context';
+import { removeTempDir } from '../support/cleanup';
 
 describe('API with a paired session', () => {
   let ctx: TestContext;
@@ -649,7 +650,7 @@ describe('session persistence', () => {
       expect(revoked.statusCode).toBe(401);
       await second.close();
     } finally {
-      await fs.rm(first.baseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+      await removeTempDir(first.baseDir);
     }
   });
 });

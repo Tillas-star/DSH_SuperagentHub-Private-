@@ -2,6 +2,7 @@ import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
+import { removeTempDir } from './cleanup';
 import { createApp } from '../../src/server/app';
 import { PasswordStore } from '../../src/server/auth/password';
 import { PairingToken } from '../../src/server/auth/pairing';
@@ -141,7 +142,7 @@ export async function createTestContext(options: TestContextOptions = {}): Promi
     pairCookie,
     close: async () => {
       await app.close();
-      await fs.rm(baseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+      await removeTempDir(baseDir);
     },
   };
 }

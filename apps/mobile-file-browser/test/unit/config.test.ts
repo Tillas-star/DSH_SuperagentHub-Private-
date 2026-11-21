@@ -10,6 +10,7 @@ import {
   validatePublicUrl,
 } from '../../src/server/config';
 import { parseByteSize, parseDurationMs } from '../../src/server/util/fs';
+import { removeTempDir } from '../support/cleanup';
 
 describe('parseCliArgs', () => {
   it('parses repeated roots and options', () => {
@@ -105,7 +106,7 @@ describe('createConfig', () => {
   });
 
   afterAll(async () => {
-    await fs.rm(baseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    await removeTempDir(baseDir);
   });
 
   it('builds local, lan and remote modes with defaults', async () => {

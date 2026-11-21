@@ -12,6 +12,7 @@ import {
   parseRange,
 } from '../../src/server/images';
 import { writeJpeg, writePng, writeText } from '../support/context';
+import { removeTempDir } from '../support/cleanup';
 
 describe('format detection', () => {
   const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0, 0, 0]);
@@ -67,7 +68,7 @@ describe('detectImage', () => {
     dir = await fs.mkdtemp(path.join(os.tmpdir(), 'mfb-images-'));
   });
   afterAll(async () => {
-    await fs.rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    await removeTempDir(dir);
   });
 
   it('accepts an image whose extension and signature agree', async () => {

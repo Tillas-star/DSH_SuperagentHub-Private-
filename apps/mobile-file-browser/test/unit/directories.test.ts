@@ -6,6 +6,7 @@ import type { RootConfig } from '../../src/server/config';
 import { listDirectory } from '../../src/server/directories';
 import { PathGuard } from '../../src/server/paths';
 import { writeJpeg, writePng, writeText } from '../support/context';
+import { removeTempDir } from '../support/cleanup';
 
 describe('listDirectory', () => {
   let baseDir: string;
@@ -36,7 +37,7 @@ describe('listDirectory', () => {
   });
 
   afterAll(async () => {
-    await fs.rm(baseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+    await removeTempDir(baseDir);
   });
 
   it('lists folders first, then images, then other files with natural sorting', async () => {
