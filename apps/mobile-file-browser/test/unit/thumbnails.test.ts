@@ -41,7 +41,7 @@ describe('ThumbnailService', () => {
   });
 
   afterAll(async () => {
-    await fs.rm(baseDir, { recursive: true, force: true });
+    await fs.rm(baseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   });
 
   it('generates a bounded WebP thumbnail and reuses its cache', async () => {

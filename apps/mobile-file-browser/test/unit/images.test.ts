@@ -67,7 +67,7 @@ describe('detectImage', () => {
     dir = await fs.mkdtemp(path.join(os.tmpdir(), 'mfb-images-'));
   });
   afterAll(async () => {
-    await fs.rm(dir, { recursive: true, force: true });
+    await fs.rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   });
 
   it('accepts an image whose extension and signature agree', async () => {

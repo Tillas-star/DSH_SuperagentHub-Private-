@@ -36,7 +36,7 @@ describe('listDirectory', () => {
   });
 
   afterAll(async () => {
-    await fs.rm(baseDir, { recursive: true, force: true });
+    await fs.rm(baseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   });
 
   it('lists folders first, then images, then other files with natural sorting', async () => {

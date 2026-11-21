@@ -72,7 +72,7 @@ describe('PathGuard', () => {
   });
 
   afterAll(async () => {
-    await fs.rm(baseDir, { recursive: true, force: true });
+    await fs.rm(baseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   });
 
   it('resolves nested paths inside the root', async () => {

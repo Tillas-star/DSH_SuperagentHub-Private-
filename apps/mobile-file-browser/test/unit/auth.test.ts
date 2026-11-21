@@ -14,7 +14,7 @@ describe('PasswordStore', () => {
     dir = await fs.mkdtemp(path.join(os.tmpdir(), 'mfb-password-'));
   });
   afterAll(async () => {
-    await fs.rm(dir, { recursive: true, force: true });
+    await fs.rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
   });
 
   it('hashes, verifies and never stores the plaintext', async () => {
@@ -86,7 +86,7 @@ describe('SessionStore', () => {
       clock.advance(60_001);
       expect(reloaded.validate(created.token)).toBeNull();
     } finally {
-      await fs.rm(dir, { recursive: true, force: true });
+      await fs.rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 
@@ -105,7 +105,7 @@ describe('SessionStore', () => {
       expect(store.validate(second.token)).toBeNull();
       expect(store.size()).toBe(0);
     } finally {
-      await fs.rm(dir, { recursive: true, force: true });
+      await fs.rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 });

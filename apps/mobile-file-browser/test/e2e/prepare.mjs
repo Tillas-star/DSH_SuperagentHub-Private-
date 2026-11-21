@@ -10,7 +10,7 @@ const base = path.join(process.cwd(), '.e2e');
 const root = path.join(base, '图片');
 const data = path.join(base, 'data');
 
-await fs.rm(base, { recursive: true, force: true });
+await fs.rm(base, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 await fs.mkdir(root, { recursive: true });
 await fs.mkdir(path.join(root, '2026-11-杭州'), { recursive: true });
 await fs.mkdir(path.join(root, '截图'), { recursive: true });

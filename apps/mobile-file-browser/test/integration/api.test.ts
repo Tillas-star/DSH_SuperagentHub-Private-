@@ -22,6 +22,7 @@ describe('API with a paired session', () => {
   let ctx: TestContext;
   let cookie: string;
   let pairResponse: Awaited<ReturnType<TestContext['app']['inject']>>;
+  let symlinkCreated = false;
 
   beforeAll(async () => {
     ctx = await createTestContext();
@@ -42,6 +43,7 @@ describe('API with a paired session', () => {
     await writeJpeg(path.join(outside, 'secret.jpg'));
     try {
       await fs.symlink(outside, path.join(ctx.rootDir, 'link-out'), 'dir');
+      symlinkCreated = true;
     } catch {
       // Ignore platforms without symlink permission.
     }
@@ -126,7 +128,9 @@ describe('API with a paired session', () => {
     expect(body.root).toEqual({ id: 'root-1', name: 'root' });
     expect(body.breadcrumb).toEqual([{ name: 'root', path: '' }]);
     expect(body.entries.map((entry: { name: string }) => entry.name)).not.toContain('.hidden.jpg');
-    expect(body.entries.map((entry: { name: string }) => entry.name)).toContain('link-out');
+    if (symlinkCreated) {
+      expect(body.entries.map((entry: { name: string }) => entry.name)).toContain('link-out');
+    }
 
     const sub = await ctx.app.inject({
       url: '/api/directories?root=root-1&path=sub',
@@ -172,11 +176,13 @@ describe('API with a paired session', () => {
       expect(response.json().error.code).toBe('forbidden-path');
     }
 
-    const symlink = await ctx.app.inject({
-      url: '/api/directories?root=root-1&path=link-out',
-      headers: auth(),
-    });
-    expect(symlink.statusCode).toBe(403);
+    if (symlinkCreated) {
+      const symlink = await ctx.app.inject({
+        url: '/api/directories?root=root-1&path=link-out',
+        headers: auth(),
+      });
+      expect(symlink.statusCode).toBe(403);
+    }
 
     const missing = await ctx.app.inject({
       url: '/api/directories?root=root-1&path=missing',
@@ -643,7 +649,7 @@ describe('session persistence', () => {
       expect(revoked.statusCode).toBe(401);
       await second.close();
     } finally {
-      await fs.rm(first.baseDir, { recursive: true, force: true });
+      await fs.rm(first.baseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     }
   });
 });

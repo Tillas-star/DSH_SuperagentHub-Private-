@@ -141,7 +141,7 @@ export async function createTestContext(options: TestContextOptions = {}): Promi
     pairCookie,
     close: async () => {
       await app.close();
-      await fs.rm(baseDir, { recursive: true, force: true });
+      await fs.rm(baseDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     },
   };
 }
